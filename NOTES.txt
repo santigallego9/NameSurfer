@@ -1,0 +1,49 @@
+        // code for onCreate
+
+        graph.setTitle("baby name popularity");
+
+        // set X bounds; Y is the same idea
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(START_YEAR);
+        graph.getViewport().setMaxX(END_YEAR);
+
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
+        graph.getViewport().setMaxY(MAX_RANK);
+        graph.getGridLabelRenderer().setVerticalLabelsVisible(false);
+
+
+
+        // code for doQuery
+        EditText edit = (EditText) findViewById(R.id.name);
+        String name = edit.getText().toString();
+        Switch sexSwitch = (Switch) findViewById(R.id.sex);
+        String sex = sexSwitch.isChecked() ? "F" : "M";
+
+        SQLiteDatabase db = openOrCreateDatabase("babynames");
+        String query = "SELECT year, rank FROM ranks "
+                + "WHERE name = '" + name + "' AND sex = '"
+                + sex + "'";
+        Cursor cr = db.rawQuery(query, null);
+        if (!cr.moveToFirst()) {
+            toast("not found");
+            return;
+        }
+
+        // the lines of the graph
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+        do {
+            int year = cr.getInt(cr.getColumnIndex("year"));
+            int rank = cr.getInt(cr.getColumnIndex("rank"));
+            if (rank == 0) {
+                rank = MAX_RANK;
+            }
+            int y = Math.max(0, Math.min(MAX_RANK, MAX_RANK - rank));
+            DataPoint point = new DataPoint(year, y);
+            series.appendData(point, false, END_YEAR);
+            log(" in year " + year + ", name " + name + " got rank " + rank);
+        } while (cr.moveToNext());
+
+        GraphView graph = (GraphView) findViewById(R.id.graph);
+        graph.removeAllSeries();
+        graph.addSeries(series);
