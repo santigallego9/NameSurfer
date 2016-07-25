@@ -1,5 +1,5 @@
 /*
- * CS 193A, Marty Stepp
+ * CS 193A, Santiago Gallego
  * This program performs a query of a 'babynames' database to find out
  * all rankings for a given baby name and draws them as a graph.
  * In today's lecture we improved the program by adding a graph of the
